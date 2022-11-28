@@ -27,7 +27,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::geoAdvection
+    Foam::isoAdvection
 
 Description
     Calculates the new VOF (alpha) field after time step dt given the initial
@@ -38,24 +38,24 @@ Description
     isosurfaces.
 
     Reference:
-        \verbatim
-            Roenby, J., Bredmose, H. and Jasak, H. (2016).
-            A computational method for sharp interface advection
-            Royal Society Open Science, 3
-            doi 10.1098/rsos.160405
-        \endverbatim
+    \verbatim
+        Roenby, J., Bredmose, H. and Jasak, H. (2016).
+        A computational method for sharp interface advection
+        Royal Society Open Science, 3
+        doi 10.1098/rsos.160405
+    \endverbatim
 
     Original code supplied by Johan Roenby, DHI (2016)
     Modified Henning Scheufler, DLR
 
 SourceFiles
-    geoAdvection.C
-    geoAdvectionTemplates.C
+    isoAdvection.C
+    isoAdvectionTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef geoAdvection_H
-#define geoAdvection_H
+#ifndef isoAdvection_H
+#define isoAdvection_H
 
 #include "advectionSchemes.H"
 #include "fvMesh.H"
@@ -65,9 +65,8 @@ SourceFiles
 #include "className.H"
 #include "reconstructionSchemes.H"
 #include "cutFaceAdvect.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "zeroField.H"
-#include "localEulerDdtScheme.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,10 +77,10 @@ namespace advection
 
 
 /*---------------------------------------------------------------------------*\
-                        Class geoAdvection Declaration
+                        Class isoAdvection Declaration
 \*---------------------------------------------------------------------------*/
 
-class geoAdvection
+class isoAdvection
     : public advectionSchemes
 {
     // Private data types
@@ -100,8 +99,14 @@ class geoAdvection
         //- Often used reference to alpha1 internal field
         scalarField& alpha1In_;
 
+        //- Face volumetric water transport
+        surfaceScalarField dVf_;
+
         //- Time spent performing interface advection
         scalar advectionTime_;
+
+        //- store timeIndex
+        label timeIndex_;
 
         // Switches and tolerances. Tolerances need to go into toleranceSwitches
 
@@ -155,47 +160,21 @@ class geoAdvection
     // Private Member Functions
 
         //- No copy construct
-        geoAdvection(const geoAdvection&) = delete;
+        isoAdvection(const isoAdvection&) = delete;
 
         //- No copy assignment
-        void operator=(const geoAdvection&) = delete;
+        void operator=(const isoAdvection&) = delete;
 
 
         // Advection functions
 
-            template < class RdeltaTType>
-            scalar deltaT
-            (
-                const RdeltaTType& rDeltaT,
-                const label celli
-            ) const
-            {
-                return 1/rDeltaT[celli];
-            }
-
-            //- overload template function
-            scalar deltaT
-            (
-                const scalar rDeltaT,
-                const label celli
-            ) const
-            {
-                return 1/rDeltaT;
-            }
+            //- Extend markedCell with cell-face-cell.
+            void extendMarkedCells(bitSet& markedCell) const;
 
             void setProcessorPatches();
 
-            template < class RdeltaTType,class SpType, class SuType >
-            void advect
-            (
-                const RdeltaTType& rDeltaT,
-                const SpType& Sp,
-                const SuType& Su
-            );
-
             //- For each face calculate volumetric face transport during dt
-            template < class RdeltaTType>
-            void timeIntegratedFlux(const RdeltaTType& rDeltaT);
+            void timeIntegratedFlux();
 
             //- For a given cell return labels of faces fluxing out of this cell
             //  (based on sign of phi)
@@ -206,22 +185,20 @@ class geoAdvection
             ) const;
 
             // LimitFluxes
-            template < class RdeltaTType,class SpType, class SuType >
+            template < class SpType, class SuType >
             void limitFluxes
             (
-                const RdeltaTType& rDeltaT,
                 const SpType& Sp,
                 const SuType& Su
             );
 
             // Bound fluxes
-            template < class RdeltaTType,class SpType, class SuType >
+            template < class SpType, class SuType >
             void boundFlux
             (
-                const scalarField& alpha1,
-                surfaceScalarField& afcorrectionValues,
+                const bitSet& nextToInterface,
+                surfaceScalarField& dVfcorrectionValues,
                 DynamicLabelList& correctedFaces,
-                const RdeltaTType& rDeltaT,
                 const SpType& Sp,
                 const SuType& Su
             );
@@ -297,13 +274,13 @@ class geoAdvection
 public:
 
     //- Runtime type information
-    TypeName("geoAdvection");
+    TypeName("isoAdvection");
 
     //- Constructors
 
         //- Construct given alpha, phi and velocity field. Note: phi should be
         // divergence free up to a sufficient tolerance
-        geoAdvection
+        isoAdvection
         (
             volScalarField& alpha1,
             const surfaceScalarField& phi,
@@ -312,7 +289,7 @@ public:
 
 
     //- Destructor
-    virtual ~geoAdvection() = default;
+    virtual ~isoAdvection() = default;
 
 
     // Member functions
@@ -351,7 +328,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "geoAdvectionTemplates.C"
+#   include "isoAdvectionTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

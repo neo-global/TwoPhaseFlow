@@ -109,7 +109,10 @@ public:
         {
             // do nothing;
         }
-
+        cutCellIso& cutCell()
+        {
+            return cutCell_;
+        }
 
 };
 

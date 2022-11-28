@@ -164,7 +164,6 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
         return Map<Type>();
     }
 
-
     // Get values from other proc
     Map<Type> neiValues;
     List<Map<Type>> sendValues(Pstream::nProcs());
@@ -173,8 +172,12 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
     {
         forAll(send_, domaini)
         {
-            for (const label sendIdx : send_[domaini])
+            //-RM
+            // for (const label sendIdx : send_[domaini])
+            forAllConstIter(labelHashSet, send_[domaini], iter)
             {
+                const label sendIdx = iter.key(); //-RM
+                //const label sendIdx = iter();
                 sendValues[domaini].insert
                 (
                     sendIdx,
@@ -211,7 +214,8 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
 
                 fromDomain >> tmpValue;
 
-                neiValues += tmpValue;
+                //neiValues += tmpValue; //-RM
+                Info<<neiValues<<"\t"<<tmpValue<<endl;
             }
         }
     }

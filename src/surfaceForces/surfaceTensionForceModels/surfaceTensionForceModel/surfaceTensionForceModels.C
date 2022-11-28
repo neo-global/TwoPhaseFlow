@@ -34,11 +34,15 @@ Foam::surfaceTensionForceModel::New
 
     word surfaceTensionForceModelTypeName
     (
+        //-RM
+        /*
         dict.getCompat<word>
         (
             "surfaceTensionForceModel",
             {{"curvatureModel", 1.1}}
         )
+        */
+        dict.lookup("surfaceTensionForceModel")
     );
 
     Info<< "Selecting surfaceTension model "

@@ -1,4 +1,4 @@
-if (pimple.nCorrPIMPLE() > 1)
+if (pimple.nCorrPimple() > 1)
 {
     // If nOuterCorrectors > 1 then for all but the first loop the advection
     // of alpha is done using an average, 0.5*phi+0.5*phiNew where phi is
@@ -39,7 +39,7 @@ if (nAlphaSubCycles > 1)
             mesh
         ),
         mesh,
-        dimensionedScalar(rhoPhi.dimensions(), Zero)
+        dimensionedScalar("zero", rhoPhi.dimensions(), Zero)
     );
 
     tmp<volScalarField> trSubDeltaT;

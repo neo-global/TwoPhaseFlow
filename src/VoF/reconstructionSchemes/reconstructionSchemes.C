@@ -113,7 +113,7 @@ Foam::reconstructionSchemes::reconstructionSchemes
             IOobject::AUTO_WRITE
         ),
         alpha1_.mesh(),
-        dimensionedVector(dimArea, Zero)
+        dimensionedVector("zero", dimArea, Zero)
     ),
     centre_
     (
@@ -126,7 +126,7 @@ Foam::reconstructionSchemes::reconstructionSchemes
             IOobject::AUTO_WRITE
         ),
         alpha1_.mesh(),
-        dimensionedVector(dimLength, Zero)
+        dimensionedVector("zero", dimLength, Zero)
     ),
     interfaceCell_(alpha1_.mesh().nCells(), false),
     interfaceLabels_(0.2*alpha1_.mesh().nCells()),

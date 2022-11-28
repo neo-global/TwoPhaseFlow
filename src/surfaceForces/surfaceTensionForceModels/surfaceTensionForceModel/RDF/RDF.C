@@ -150,10 +150,11 @@ Foam::labelList Foam::RDF::getNeibourProcs(const boolList& nextToInterface)
 
     syncTools::syncPointMap(alpha1_.mesh(), neiProcMap, appendOp<label>());
     labelHashSet neiProcs;
-
-    forAllConstIters(neiProcMap,iter)
+    //-RM
+    //forAllConstIter(neiProcMap,iter)
+    forAll(neiProcMap,iter)
     {
-        neiProcs.insert(iter());
+        neiProcs.insert(iter);
     }
 
     return neiProcs.toc();
@@ -374,7 +375,7 @@ void Foam::RDF::correct()
     // geometry there are less face/edge aligned items.
     treeBoundBox bb
     (
-        treeBoundBox(FaceCentreField_).extend(rndGen, 1e-4)
+        treeBoundBox(FaceCentreField_).extend( 1e-4)
     );
 
     bb.min() -= point(1e-8, 1e-8, 1e-8);

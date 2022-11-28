@@ -18,7 +18,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "gravity.H"
-#include "gravityMeshObject.H"
+//#include "gravityMeshObject.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvc.H"
 
@@ -62,7 +62,7 @@ Foam::gravity::gravity
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE
         ),
-        dimensionedScalar(dimLength, Zero)
+        dimensionedScalar("zero", dimLength, Zero)
     )
 {
     calculateAcc();
@@ -75,7 +75,21 @@ void Foam::gravity::calculateAcc()
 {
     // read only if mesh changed would be clever
     const fvMesh& mesh = acc_.mesh();
+    //-RM
+    /*
     const uniformDimensionedVectorField& g = meshObjects::gravity::New(mesh.time());
+    */
+    const uniformDimensionedVectorField g
+    (
+        IOobject
+        (
+            "g",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    );
     g_.value() = g.value();
 
     dimensionedScalar ghRef

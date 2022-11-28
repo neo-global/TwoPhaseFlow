@@ -173,7 +173,8 @@ void Foam::cutCell::calcIsoFacePointsFromEdges
     const vector zhat = normalised(faceArea);
     vector xhat = faceEdges[0][0] - faceCentre;
     xhat = (xhat - (xhat & zhat)*zhat);
-    xhat.normalise();
+//    xhat.normalise();
+    xhat /= mag(xhat);
     if (mag(xhat) == 0)
     {
         facePoints.clear();
@@ -185,7 +186,8 @@ void Foam::cutCell::calcIsoFacePointsFromEdges
         facePoints.clear();
         return;
     }
-    yhat.normalise();
+    //yhat.normalise();
+    yhat /= mag(yhat);
 
     // Calculating all intersection points
     DynamicList<point> unsortedFacePoints(3 * faceEdges.size());

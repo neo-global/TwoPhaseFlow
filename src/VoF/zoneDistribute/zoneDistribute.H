@@ -102,7 +102,6 @@ class zoneDistribute
             const label localIdx
         ) const;
 
-
 public:
 
     //- Runtime information

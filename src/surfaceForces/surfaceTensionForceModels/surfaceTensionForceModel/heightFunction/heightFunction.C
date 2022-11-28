@@ -607,8 +607,8 @@ void Foam::heightFunction::correct()
             }
         }
     }
-
-    forAllIters(parallelStencil,iter)
+    //-RM
+    forAllIter(twoDimStencilMap, parallelStencil, iter)
     {
         if (iter().foundHeight())
         {

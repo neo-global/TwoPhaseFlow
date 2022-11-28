@@ -65,7 +65,8 @@ SourceFiles
 #include "className.H"
 #include "reconstructionSchemes.H"
 #include "cutFaceAdvect.H"
-#include "bitSet.H"
+//#include "bitSet.H"
+#include "PackedBoolList.H"
 #include "zeroField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -169,7 +170,7 @@ class isoAdvection
         // Advection functions
 
             //- Extend markedCell with cell-face-cell.
-            void extendMarkedCells(bitSet& markedCell) const;
+            void extendMarkedCells(PackedBoolList& markedCell) const;
 
             void setProcessorPatches();
 
@@ -196,7 +197,7 @@ class isoAdvection
             template < class SpType, class SuType >
             void boundFlux
             (
-                const bitSet& nextToInterface,
+                const PackedBoolList& nextToInterface,
                 surfaceScalarField& dVfcorrectionValues,
                 DynamicLabelList& correctedFaces,
                 const SpType& Sp,

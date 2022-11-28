@@ -142,12 +142,15 @@ Foam::zoneCPCStencil& Foam::zoneCPCStencil::New(const fvMesh& mesh)
 
     if(found)
     {
-        ptr = mesh.thisDb().getObjectPtr<zoneCPCStencil>
+        //-RM
+        //ptr = mesh.thisDb().getObjectPtr<zoneCPCStencil>
+        zoneCPCStencil& ptr =
+        mesh.thisDb().lookupObjectRef<zoneCPCStencil>
         (
             zoneCPCStencil::typeName
         );
 
-        return *ptr;
+        return ptr; //*ptr;
     }
 
     zoneCPCStencil* objectPtr = new zoneCPCStencil(mesh);

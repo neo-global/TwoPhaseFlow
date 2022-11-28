@@ -62,7 +62,7 @@ Foam::implicitFunctions::cylinderImplicitFunction::cylinderImplicitFunction
     direction_(direction),
     project_(tensor::I)
 {
-   direction_.normalise();
+   direction_ /=mag(direction_);
    project_ = tensor::I - direction_*direction_; // outer product
 }
 
@@ -72,13 +72,13 @@ Foam::implicitFunctions::cylinderImplicitFunction::cylinderImplicitFunction
     const dictionary& dict
 )
 :
-    origin_(dict.get<point>("origin")),
-    radius_(dict.get<scalar>("radius")),
+    origin_(dict.lookup("origin")),
+    radius_(readScalar(dict.lookup("radius"))),
     scale_(dict.lookupOrDefault<scalar>("scale", 1)),
-    direction_(dict.get<vector>("direction")),
+    direction_(dict.lookup("direction")),
     project_(tensor::I)
 {
-    direction_.normalise();
+    direction_ /=mag(direction_);
     project_ = tensor::I - (direction_ * direction_); // outer product
 }
 

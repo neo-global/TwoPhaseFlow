@@ -55,7 +55,7 @@ Foam::constantCurvature::constantCurvature
     ),
     curv_
     (
-        dict.get<scalar>("curv")
+        readScalar(dict.lookup("curv"))
     )
 {
 

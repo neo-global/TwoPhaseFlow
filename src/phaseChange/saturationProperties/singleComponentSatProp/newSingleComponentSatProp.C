@@ -33,7 +33,7 @@ Foam::singleComponentSatProp::New
 
     word singleComponentSatPropTypeName
     (
-        dict.get<word>("singleComponentSatProp")
+        dict.lookup<word>("singleComponentSatProp")
     );
 
     Info<< "Selecting saturation model "

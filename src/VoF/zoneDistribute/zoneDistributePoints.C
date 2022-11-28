@@ -75,14 +75,18 @@ Foam::zoneDistributePoints::nonEmptyWedgePatch() const
         }
     }
 
-    return autoPtr<indirectPrimitivePatch>::New
+    //-RM
+    return autoPtr<indirectPrimitivePatch>
     (
-        IndirectList<face>
+        new indirectPrimitivePatch
         (
-            mesh_.faces(),
-            nonWedgeEmptyFaces
-        ),
-        mesh_.points()
+            IndirectList<face>
+            (
+                mesh_.faces(),
+                nonWedgeEmptyFaces
+            ),
+            mesh_.points()
+        )
     );
 }
 

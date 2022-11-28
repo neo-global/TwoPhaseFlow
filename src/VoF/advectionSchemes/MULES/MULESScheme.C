@@ -181,7 +181,6 @@ void Foam::advection::MULESScheme::advect()
         );
 
         // Set the off-centering coefficient according to ddt scheme
-
         if
         (
             isType<fv::EulerDdtScheme<scalar>>(ddtAlpha())
@@ -278,7 +277,17 @@ void Foam::advection::MULESScheme::advect()
         if (alphaApplyPrevCorr_)
         {
             Info<< "Applying the previous iteration compression flux" << endl;
-            MULES::correct(alpha1_, alphaPhi_, talphaPhiCorr0_, 1, 0);
+            MULES::correct
+            (
+                geometricOneField(),
+                alpha1_,
+                alphaPhi_,
+                talphaPhiCorr0_,
+                oneField(),
+                zeroField()
+            );
+
+
 
             alphaPhi_ += talphaPhiCorr0_;
         }
@@ -325,8 +334,16 @@ void Foam::advection::MULESScheme::advect()
             tmp<surfaceScalarField> talphaPhiCorr(talphaPhiUn - alphaPhi_);
             volScalarField alpha10("alpha10", alpha1_);
 
-            MULES::correct(alpha1_, talphaPhiUn, talphaPhiCorr.ref(), 1, 0);
-
+            //MULES::correct(alpha1_, talphaPhiUn, talphaPhiCorr.ref(), 1, 0);
+            MULES::correct
+            (
+                geometricOneField(),
+                alpha1_,
+                alphaPhi_,
+                talphaPhiCorr0_,
+                oneField(),
+                zeroField()
+            );
             // Under-relax the correction for all but the 1st corrector
             if (aCorr == 0)
             {
@@ -342,7 +359,15 @@ void Foam::advection::MULESScheme::advect()
         {
             alphaPhi_ = talphaPhiUn;
 
-            MULES::explicitSolve(alpha1_, phiCN, alphaPhi_, 1, 0);
+            MULES::explicitSolve
+            (
+                geometricOneField(),
+                alpha1_,
+                phiCN,
+                alphaPhi_,
+                1,
+                0
+            );
         }
 
         alpha2_ = 1.0 - alpha1_;
@@ -502,7 +527,17 @@ void Foam::advection::MULESScheme::advect(const volScalarField::Internal& Sp,con
         if (alphaApplyPrevCorr_)
         {
             Info<< "Applying the previous iteration compression flux" << endl;
-            MULES::correct(alpha1_, alphaPhi_, talphaPhiCorr0_, 1, 0);
+            //MULES::correct(alpha1_, alphaPhi_, talphaPhiCorr0_, 1, 0);
+
+            MULES::correct
+            (
+                geometricOneField(),
+                alpha1_,
+                alphaPhi_,
+                talphaPhiCorr0_,
+                oneField(),
+                zeroField()
+            );
 
             alphaPhi_ += talphaPhiCorr0_;
         }
@@ -629,4 +664,3 @@ void Foam::advection::MULESScheme::advect(const volScalarField::Internal& Sp,con
         << endl;
 
 }
-

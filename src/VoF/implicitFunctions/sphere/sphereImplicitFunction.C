@@ -65,8 +65,8 @@ Foam::implicitFunctions::sphereImplicitFunction::sphereImplicitFunction
     const dictionary& dict
 )
 :
-    origin_(dict.get<point>("origin")),
-    radius_(dict.get<scalar>("radius")),
+    origin_(dict.lookup("origin")),
+    radius_(readScalar(dict.lookup("radius"))),
     scale_(dict.lookupOrDefault<scalar>("scale" ,1))
 {}
 

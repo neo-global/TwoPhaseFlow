@@ -61,7 +61,7 @@ Foam::implicitFunctions::ellipsoidImplicitFunction::ellipsoidImplicitFunction
     const dictionary& dict
 )
 :
-    semiAxis_(dict.get<vector>("semiAxis"))
+    semiAxis_(dict.lookup("semiAxis"))
 {}
 
 

@@ -68,7 +68,7 @@ Foam::functionObjects::thermalResiduals::thermalResiduals
     TField_(),
     alphaField_(),
     rhoField_(),
-    subCooled_("subCooled",dimTemperature,dict.get<scalar>("subCooled"))
+    subCooled_("subCooled",dimTemperature,dict.lookup<scalar>("subCooled"))
 {
 
 

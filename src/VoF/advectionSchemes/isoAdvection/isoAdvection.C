@@ -83,7 +83,7 @@ Foam::advection::isoAdvection::isoAdvection
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar(dimVol, Zero)
+        dimensionedScalar("0", dimVol, Zero)
     ),
     advectionTime_(0),
     timeIndex_(-1),
@@ -97,7 +97,7 @@ Foam::advection::isoAdvection::isoAdvection
     // Cell cutting data
     surfCells_(label(0.2*mesh_.nCells())),
     advectFace_(alpha1.mesh(), alpha1),
-    bsFaces_(label(0.2*mesh_.nBoundaryFaces())),
+    bsFaces_(label(0.2*(mesh_.nFaces()-mesh_.nInternalFaces()))), //nBoundaryFaces -RM
     bsx0_(bsFaces_.size()),
     bsn0_(bsFaces_.size()),
     bsUn0_(bsFaces_.size()),
@@ -154,11 +154,11 @@ void Foam::advection::isoAdvection::setProcessorPatches()
 
 void Foam::advection::isoAdvection::extendMarkedCells
 (
-    bitSet& markedCell
+    PackedBoolList& markedCell
 ) const
 {
     // Mark faces using any marked cell
-    bitSet markedFace(mesh_.nFaces());
+    PackedBoolList markedFace(mesh_.nFaces());
 
     for (const label celli : markedCell)
     {
@@ -170,7 +170,7 @@ void Foam::advection::isoAdvection::extendMarkedCells
     // Update cells using any markedFace
     for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
-        if (markedFace.test(facei))
+        if (markedFace.get(facei))
         {
             markedCell.set(mesh_.faceOwner()[facei]);
             markedCell.set(mesh_.faceNeighbour()[facei]);
@@ -178,7 +178,7 @@ void Foam::advection::isoAdvection::extendMarkedCells
     }
     for (label facei = mesh_.nInternalFaces(); facei < mesh_.nFaces(); ++facei)
     {
-        if (markedFace.test(facei))
+        if (markedFace.get(facei)) //markedFace.get() -RM
         {
             markedCell.set(mesh_.faceOwner()[facei]);
         }
@@ -235,6 +235,11 @@ void Foam::advection::isoAdvection::timeIntegratedFlux()
             const point x0 = surf_->centre()[celli];
             vector n0 = -surf_->normal()[celli];
             n0 /= (mag(n0));
+
+            if (writeIsoFacesToFile_ && mesh_.time().writeTime())
+            {
+                //isoFacePts.append(surf_->cutCell().facePoints());
+            }
 
             // Get the speed of the isoface by interpolating velocity and
             // dotting it with isoface unit normal
@@ -345,6 +350,8 @@ void Foam::advection::isoAdvection::timeIntegratedFlux()
 
     // Synchronize processor patches
     syncProcPatches(dVf_, phi_);
+
+    //advectFace_.isoFacesToFile(isoFacePts, mesh_.time().timeName(), "isoVTK");
 
     DebugInfo << "Number of isoAdvector surface cells = "
         << returnReduce(nSurfaceCells, sumOp<label>()) << endl;

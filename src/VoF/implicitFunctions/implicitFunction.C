@@ -45,9 +45,11 @@ Foam::autoPtr<Foam::implicitFunction> Foam::implicitFunction::New
     const dictionary& dict
 )
 {
-    const auto& cstrIter = dictConstructorTablePtr_->find(functionType);
+    //const auto& cstrIter = dictConstructorTablePtr_->find(functionType);
+    typename dictConstructorTable::iterator cstrIter =
+        dictConstructorTablePtr_->find(functionType);
 
-    if (!cstrIter.found())
+    if (cstrIter == dictConstructorTablePtr_->end())
     {
         FatalErrorInFunction
             << "Unknown implicitFunction type " << functionType

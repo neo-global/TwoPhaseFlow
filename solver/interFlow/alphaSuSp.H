@@ -7,7 +7,7 @@ volScalarField::Internal Sp
         mesh
     ),
     mesh,
-    dimensionedScalar(dimless/dimTime, Zero)
+    dimensionedScalar("zero", dimless/dimTime, Zero)
 );
 
 volScalarField::Internal Su
@@ -19,7 +19,7 @@ volScalarField::Internal Su
         mesh
     ),
     mesh,
-    dimensionedScalar(dimless/dimTime, Zero)
+    dimensionedScalar("zero", dimless/dimTime, Zero)
 );
 
 volScalarField::Internal divU

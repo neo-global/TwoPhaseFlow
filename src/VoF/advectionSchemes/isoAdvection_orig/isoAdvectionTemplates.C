@@ -134,7 +134,7 @@ void Foam::advection::isoAdvection::limitFluxes
 
     surfaceScalarField dVfcorrectionValues("dVfcorrectionValues", dVf_*0.0);
 
-    PackedBoolList needBounding(mesh_.nCells(),false);
+    bitSet needBounding(mesh_.nCells(),false);
     needBounding.set(surfCells_);
 
     extendMarkedCells(needBounding);
@@ -216,7 +216,7 @@ void Foam::advection::isoAdvection::limitFluxes
 template<class SpType, class SuType>
 void Foam::advection::isoAdvection::boundFlux
 (
-    const PackedBoolList& nextToInterface,
+    const bitSet& nextToInterface,
     surfaceScalarField& dVfcorrectionValues,
     DynamicList<label>& correctedFaces,
     const SpType& Sp,

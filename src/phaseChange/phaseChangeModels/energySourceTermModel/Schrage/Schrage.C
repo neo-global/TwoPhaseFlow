@@ -67,7 +67,7 @@ Foam::Schrage::Schrage
 {
     if (phase2_.thermo().incompressible())
     {
-        R_.value() = modelDict().get<scalar>("R");
+        R_.value() = modelDict().lookup<scalar>("R");
     }
 }
 

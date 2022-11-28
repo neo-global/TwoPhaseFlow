@@ -64,10 +64,10 @@ Foam::implicitFunctions::planeImplicitFunction::planeImplicitFunction
     const dictionary& dict
 )
 :
-    origin_(dict.get<vector>("origin")),
-    normal_(dict.get<vector>("normal"))
+    origin_(dict.lookup("origin")),
+    normal_(dict.lookup("normal"))
 {
-    normal_.normalise();
+    normal_ /= mag(normal_);
 }
 
 

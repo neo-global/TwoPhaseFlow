@@ -67,15 +67,30 @@ Foam::reconstructedDistanceFunction::coupledFacesPatch() const
         }
     }
 
-    return autoPtr<indirectPrimitivePatch>::New
+    // return autoPtr<indirectPrimitivePatch>::New
+    // (
+    //     IndirectList<face>
+    //     (
+    //         mesh_.faces(),
+    //         nCoupledFaces
+    //     ),
+    //     mesh_.points()
+    //);
+    //-RM
+    return autoPtr<indirectPrimitivePatch>
     (
-        IndirectList<face>
+        new indirectPrimitivePatch
         (
-            mesh_.faces(),
-            nCoupledFaces
-        ),
-        mesh_.points()
+            IndirectList<face>
+            (
+                mesh_.faces(),
+                nCoupledFaces
+            ),
+            mesh_.points()
+        )
     );
+
+
 }
 
 void Foam::reconstructedDistanceFunction::markCellsNearSurf
@@ -245,16 +260,17 @@ Foam::reconstructedDistanceFunction& Foam::reconstructedDistanceFunction::New(co
     (
         reconstructedDistanceFunction::typeName
     );
-    reconstructedDistanceFunction* ptr = nullptr;
-
-    if (found)
+    //reconstructedDistanceFunction* ptr = nullptr;
+    if(found)
     {
-        ptr = mesh.thisDb().getObjectPtr<reconstructedDistanceFunction>
+//        ptr = mesh.thisDb().getObjectPtr<reconstructedDistanceFunction>
+        //-RM
+        reconstructedDistanceFunction& ptr = mesh.thisDb().lookupObjectRef<reconstructedDistanceFunction>
         (
             reconstructedDistanceFunction::typeName
         );
 
-        return *ptr;
+        return ptr;
     }
 
     reconstructedDistanceFunction* objectPtr =
@@ -592,9 +608,9 @@ Foam::reconstructedDistanceFunction::constructRDFOctree
     // geometry there are less face/edge aligned items.
     treeBoundBox bb
     (
-        treeBoundBox(centre).extend(rndGen, 1e-4)
+        //treeBoundBox(centre).extend(rndGen, 1e-4)
+        treeBoundBox(centre).extend(1e-4)
     );
-
 
     bb.min() -= point(1e-8, 1e-8, 1e-8);
     bb.max() += point(1e-8, 1e-8, 1e-8);

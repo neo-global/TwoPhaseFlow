@@ -92,17 +92,17 @@ Foam::hTabulatedThermo<EquationOfState>::hTabulatedThermo
 )
 :
     EquationOfState(dict),
-    Hf_(dict.subDict("thermodynamics").get<scalar>("Hf")),
-    Sf_(dict.subDict("thermodynamics").get<scalar>("Sf")),
+    Hf_(dict.subDict("thermodynamics").lookup<scalar>("Hf")),
+    Sf_(dict.subDict("thermodynamics").lookup<scalar>("Sf")),
 
-    // fileName_(dict.subDict("thermodynamics").get<fileName>("CpFile")),
+    // fileName_(dict.subDict("thermodynamics").lookup<fileName>("CpFile")),
     // reader_(tableReader<scalar>::New(dict.subDict("thermodynamics"))),
     CpTable_()
 {
-    scalar nPoints = dict.subDict("transport").get<scalar>("nPoints");
-    scalar minTVal = dict.subDict("thermodynamics").get<scalar>("TMin");
-    scalar maxTVal = dict.subDict("thermodynamics").get<scalar>("TMax");
-    fileName file = dict.subDict("thermodynamics").get<fileName>("CpFile");
+    scalar nPoints = dict.subDict("transport").lookup<scalar>("nPoints");
+    scalar minTVal = dict.subDict("thermodynamics").lookup<scalar>("TMin");
+    scalar maxTVal = dict.subDict("thermodynamics").lookup<scalar>("TMax");
+    fileName file = dict.subDict("thermodynamics").lookup<fileName>("CpFile");
     // hCoeffs_ = CpCoeffs_.integral();
     // sCoeffs_ = CpCoeffs_.integralMinus1();
 

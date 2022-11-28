@@ -63,7 +63,7 @@ Foam::implicitFunctions::paraboloidImplicitFunction::paraboloidImplicitFunction
     const dictionary& dict
 )
 :
-    coeffs_(dict.get<vector>("coeffs"))
+    coeffs_(dict.lookup("coeffs"))
 {}
 
 

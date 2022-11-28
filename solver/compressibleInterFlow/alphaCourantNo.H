@@ -31,12 +31,12 @@ Description
 
 scalar maxAlphaCo
 (
-    runTime.controlDict().get<scalar>("maxAlphaCo")
+    runTime.controlDict().lookup<scalar>("maxAlphaCo")
 );
 
 scalar maxCapillaryNum
 (
-    runTime.controlDict().get<scalar>("maxCapillaryNum")
+    runTime.controlDict().lookup<scalar>("maxCapillaryNum")
 );
 
 scalar alphaCoNum = 0.0;

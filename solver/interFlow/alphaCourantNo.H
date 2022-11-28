@@ -31,12 +31,12 @@ Description
 
 scalar maxAlphaCo
 (
-    runTime.controlDict().get<scalar>("maxAlphaCo")
+    readScalar(runTime.controlDict().lookup("maxAlphaCo"))
 );
 
 scalar maxCapillaryNum
 (
-    runTime.controlDict().get<scalar>("maxCapillaryNum")
+    readScalar(runTime.controlDict().lookup("maxCapillaryNum"))
 );
 
 scalar alphaCoNum = 0.0;
@@ -55,7 +55,7 @@ if (mesh.nInternalFaces())
 
     meanAlphaCoNum =
         0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
-    
+
     capillaryNum = runTime.deltaTValue()/surfForces.capillaryDt(rho1,rho2);
 
 }

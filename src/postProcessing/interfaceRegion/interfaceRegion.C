@@ -84,7 +84,7 @@ bool Foam::functionObjects::interfaceRegion::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
-    nLayers_ = dict.get<scalar>("nLayers");
+    nLayers_ = dict.lookup<scalar>("nLayers");
 
 
     return true;

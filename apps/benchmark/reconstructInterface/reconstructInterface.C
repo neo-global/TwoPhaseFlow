@@ -186,8 +186,8 @@ int main(int argc, char *argv[])
     dictionary reconDict = fvSolutionDict.subDict("reconstruction");
 
     // lookup of relevevant parameters
-    label nIter = reconDict.get<label>("nIter");
-    word setAlphaMethod = reconDict.get<word>("setAlphaMethod");
+    label nIter = reconDict.lookup<label>("nIter");
+    word setAlphaMethod = reconDict.lookup<word>("setAlphaMethod");
     if (setAlphaMethod != "cutCellImpFunc" && setAlphaMethod != "cutCellIso")
     {
         FatalError  << "valid choice are only cutCellImpFunc or cutCellIso"

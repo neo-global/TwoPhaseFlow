@@ -70,14 +70,17 @@ Foam::zoneCellStencils::nonEmptyFacesPatch() const
         }
     }
 
-    return autoPtr<indirectPrimitivePatch>::New
+    return autoPtr<indirectPrimitivePatch>
     (
-        IndirectList<face>
+        new indirectPrimitivePatch
         (
-            meshRef_.faces(),
-            nonEmptyFaces
-        ),
-        meshRef_.points()
+            IndirectList<face>
+            (
+                meshRef_.faces(),
+                nonEmptyFaces
+            ),
+            meshRef_.points()
+        )
     );
 }
 
@@ -112,14 +115,17 @@ Foam::zoneCellStencils::allCoupledFacesPatch() const
         }
     }
 
-    return autoPtr<indirectPrimitivePatch>::New
+    return autoPtr<indirectPrimitivePatch>
     (
-        IndirectList<face>
+        new indirectPrimitivePatch
         (
-            meshRef_.faces(),
-            coupledFaces
-        ),
-        meshRef_.points()
+            IndirectList<face>
+            (
+                meshRef_.faces(),
+                coupledFaces
+            ),
+            meshRef_.points()
+        )
     );
 }
 
@@ -128,7 +134,7 @@ void Foam::zoneCellStencils::validBoundaryFaces(boolList& isValidBFace) const
 {
     const polyBoundaryMesh& patches = meshRef_.boundaryMesh();
 
-    isValidBFace.setSize(meshRef_.nBoundaryFaces());
+    isValidBFace.setSize(meshRef_.nFaces()-meshRef_.nInternalFaces());
 
     isValidBFace = true;
 
@@ -194,9 +200,10 @@ void Foam::zoneCellStencils::merge
     label n = 0;
     cCells[n++] = globalI;
 
-    for (const label seti : set)
+    //for (const label seti : set)
+    forAllConstIter(labelHashSet, set, seti)
     {
-        cCells[n++] = seti;
+        cCells[n++] = seti.key();
     }
 }
 

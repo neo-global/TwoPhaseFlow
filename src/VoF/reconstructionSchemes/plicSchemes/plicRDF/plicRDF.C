@@ -510,14 +510,14 @@ void Foam::reconstruction::plicRDF::reconstruct(bool forceUpdate)
     // nextToInterface is update on setInitNormals
     const boolList& nextToInterface_ = RDF_.nextToInterface();
 
-    bitSet tooCoarse(mesh_.nCells(),false);
+    PackedBoolList tooCoarse(mesh_.nCells(),false); //-RM : replaced bitSet
 
     for (int iter=0; iter<iteration_; ++iter)
     {
         forAll(interfaceLabels_, i)
         {
             const label celli = interfaceLabels_[i];
-            if (mag(interfaceNormal_[i]) == 0 || tooCoarse.test(celli))
+            if (mag(interfaceNormal_[i]) == 0 || tooCoarse.get(celli)) //-RM
             {
                 continue;
             }

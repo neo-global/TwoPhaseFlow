@@ -81,7 +81,7 @@ Foam::advection::geoAdvection::geoAdvection
     // Cell cutting data
     surfCells_(label(0.2*mesh_.nCells())),
     advectFace_(alpha1.mesh(), alpha1),
-    bsFaces_(label(0.2*(mesh_.nFaces()-mesh_.nInternalFaces()))),
+    bsFaces_(label(0.2*mesh_.nBoundaryFaces())),
     bsx0_(bsFaces_.size()),
     bsn0_(bsFaces_.size()),
     bsUn0_(bsFaces_.size()),

@@ -46,7 +46,8 @@ Foam::autoPtr<Foam::multiDimPolyFunctions> Foam::multiDimPolyFunctions::New
     wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(multiDimPolyFunctionsType);
 
-    if (!cstrIter.found())
+    //if (!cstrIter.found()) //-RM
+    if (cstrIter == wordConstructorTablePtr_->end())
     {
         FatalErrorInFunction
             << "Unknown multiDimPolyFunctions type " << multiDimPolyFunctionsType

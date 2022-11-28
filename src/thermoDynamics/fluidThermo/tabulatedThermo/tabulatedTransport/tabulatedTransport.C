@@ -92,16 +92,16 @@ Foam::tabulatedTransport<Thermo>::tabulatedTransport
 )
 :
     Thermo(dict),
-    // interpolMuTable_(dict.subDict("transport").get<fileName>("MuFile")),
-    // interpolKappaTable_(dict.subDict("transport").get<fileName>("KappaFile"))
+    // interpolMuTable_(dict.subDict("transport").lookup<fileName>("MuFile")),
+    // interpolKappaTable_(dict.subDict("transport").lookup<fileName>("KappaFile"))
     MuTable_(),
     KappaTable_()
 {
-    scalar nPoints = dict.subDict("transport").get<scalar>("nPoints");
-    scalar minTVal = dict.subDict("transport").get<scalar>("TMin");
-    scalar maxTVal = dict.subDict("transport").get<scalar>("TMax");
-    fileName muFile = dict.subDict("transport").get<fileName>("MuFile");
-    fileName kappaFile = dict.subDict("transport").get<fileName>("KappaFile");
+    scalar nPoints = dict.subDict("transport").lookup<scalar>("nPoints");
+    scalar minTVal = dict.subDict("transport").lookup<scalar>("TMin");
+    scalar maxTVal = dict.subDict("transport").lookup<scalar>("TMax");
+    fileName muFile = dict.subDict("transport").lookup<fileName>("MuFile");
+    fileName kappaFile = dict.subDict("transport").lookup<fileName>("KappaFile");
 
     autoPtr<tableReader<scalar>> reader =
         tableReader<scalar>::New(dict.subDict("transport"));

@@ -71,15 +71,15 @@ Foam::implicitFunctions::sinImplicitFunction::sinImplicitFunction
     const dictionary& dict
 )
 :
-    period_(dict.get<scalar>("period")),
+    period_(readScalar(dict.lookup("period"))),
     phase_(dict.lookupOrDefault<scalar>("phase",0.0)),
-    amplitude_(dict.get<scalar>("amplitude")),
-    up_(dict.get<vector>("up")),
-    direction_(dict.get<vector>("direction")),
-    origin_(dict.get<vector>("origin"))
+    amplitude_(readScalar(dict.lookup("amplitude"))),
+    up_(dict.lookup("up")),
+    direction_(dict.lookup("direction")),
+    origin_(dict.lookup("origin"))
 {
-    direction_.normalise();
-    up_.normalise();
+    direction_ /= mag(direction_);
+    up_ /=mag(up_);
 }
 
 

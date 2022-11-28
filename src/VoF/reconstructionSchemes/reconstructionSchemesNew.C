@@ -52,9 +52,11 @@ Foam::reconstructionSchemes::New
 
     Info<< "Selecting reconstructionScheme: " << schemeType << endl;
 
-    auto cstrIter = componentsConstructorTablePtr_->cfind(schemeType);
+    //auto cstrIter = componentsConstructorTablePtr_->cfind(schemeType);
+    typename componentsConstructorTable::iterator cstrIter =
+        componentsConstructorTablePtr_->find(schemeType);
 
-    if (!cstrIter.found())
+    if (cstrIter == componentsConstructorTablePtr_->end())
     {
         FatalErrorInFunction
             << "Unknown reconstructionSchemes type "

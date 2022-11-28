@@ -265,13 +265,13 @@ index 93836d80..d3c62e32 100644
      }
 @@ -211,19 +216,11 @@ Foam::Function1Types::CSV<Type>::CSV
      TableBase<Type>(entryName, dict),
-     nHeaderLine_(dict.get<label>("nHeaderLine")),
-     refColumn_(dict.get<label>("refColumn")),
+     nHeaderLine_(dict.lookup<label>("nHeaderLine")),
+     refColumn_(dict.lookup<label>("refColumn")),
 -    componentColumns_(dict.lookup("componentColumns")),
 +    componentColumns_(getComponentColumns("componentColumns", dict)),
      separator_(dict.lookupOrDefault<string>("separator", ",")[0]),
-     mergeSeparators_(dict.get<bool>("mergeSeparators")),
-     fName_(fName.empty() ? dict.get<fileName>("file") : fName)
+     mergeSeparators_(dict.lookup<bool>("mergeSeparators")),
+     fName_(fName.empty() ? dict.lookup<fileName>("file") : fName)
  {
 -    if (componentColumns_.size() != pTraits<Type>::nComponents)
 -    {

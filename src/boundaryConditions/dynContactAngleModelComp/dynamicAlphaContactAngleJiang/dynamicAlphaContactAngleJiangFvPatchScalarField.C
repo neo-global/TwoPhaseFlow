@@ -141,10 +141,10 @@ Foam::dynamicAlphaContactAngleJiangFvPatchScalarField::theta
     word phase2Name (wordList(transportProperties.lookup("phases"))[1]);
 
     dimensionedScalar rho1 =
-        transportProperties.subDict(phase1Name).get<dimensionedScalar>("rho");
+        transportProperties.subDict(phase1Name).lookup<dimensionedScalar>("rho");
 
     dimensionedScalar sigmap =
-        transportProperties.get<dimensionedScalar>("sigma");
+        transportProperties.lookup<dimensionedScalar>("sigma");
 
     const fvPatchScalarField&  nu1p = nu1.boundaryField()[patchi];
 

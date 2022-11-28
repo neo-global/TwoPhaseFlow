@@ -452,7 +452,15 @@ Foam::label Foam::cutCellImpFunc::calcSubCell
                     if(nPoints == 3)
                     {
                         cutFaceCentres_.append(cuttedFace.centre(cfP));
-                        cutFaceAreas_.append(cuttedFace.areaNormal(cfP));
+                        //cutFaceAreas_.append(cuttedFace.areaNormal(cfP));
+                        cutFaceAreas_.append
+                        (
+                            0.5
+                	       *(
+                			    (cfP[1]-cfP[0])
+                		       ^(cfP[2]-cfP[0])
+                		     )
+                        );
                     }
                     else
                     {
@@ -468,7 +476,15 @@ Foam::label Foam::cutCellImpFunc::calcSubCell
                             );
 
                             cutFaceCentres_.append(triangle.centre());
-                            cutFaceAreas_.append(triangle.areaNormal());
+                            cutFaceAreas_.append
+                            //(triangle->area());
+                            (
+                                0.5
+                               *(
+                                   (triangle.b()-triangle.a())
+                                  ^(triangle.c()-triangle.a())
+                                )
+                            );
 
                         }
                     }
@@ -520,14 +536,17 @@ Foam::label Foam::cutCellImpFunc::calcSubCell
         fileName file = "triiFFace_celli"  + std::to_string(cellI) +  +  ".vtk";
         for(label refineCounter = 0; refineCounter < 3; refineCounter++)
         {
-            freeSurf_ = refineFreeSurfaces(freeSurf_);
+            freeSurf_ = refineFreeSurfaces(freeSurf_); //-RM: triSurface.
         }
-        // freeSurf_.write(file);
+         freeSurf_.write(file);
+        //-RM: this line can help get output of the surface as a VTK for viz.
 
         forAll(freeSurf_,triI)
         {
             cutFaceCentres_.append(freeSurf_.Cf()[triI]);
-            cutFaceAreas_.append(freeSurf_.Sf()[triI]);
+            //cutFaceAreas_.append(freeSurf_.Sf()[triI]);
+            //-RM : calls to core OF primitive shapes,
+            //but this method does not exist in triSurface.
         }
 
         // calc volume and sub cell centre

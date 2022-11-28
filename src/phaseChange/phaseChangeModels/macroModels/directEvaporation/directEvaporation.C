@@ -52,7 +52,7 @@ Foam::directEvaporation::directEvaporation
         turbModel,
         dict
     ),
-    superheated_(modelDict().get<scalar>("superheated")),
+    superheated_(modelDict().lookup<scalar>("superheated")),
     boilingHeatFlow_
     (
         IOobject

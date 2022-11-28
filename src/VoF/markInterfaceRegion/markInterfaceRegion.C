@@ -62,15 +62,29 @@ Foam::markInterfaceRegion::coupledFacesPatch() const
         }
     }
 
-    return autoPtr<indirectPrimitivePatch>::New
+    // return autoPtr<indirectPrimitivePatch>::New
+    // (
+    //     IndirectList<face>
+    //     (
+    //         mesh_.faces(),
+    //         nCoupledFaces
+    //     ),
+    //     mesh_.points()
+    // );
+    //-RM
+    return autoPtr<indirectPrimitivePatch>
     (
-        IndirectList<face>
+        new indirectPrimitivePatch
         (
-            mesh_.faces(),
-            nCoupledFaces
-        ),
-        mesh_.points()
+            IndirectList<face>
+            (
+                mesh_.faces(),
+                nCoupledFaces
+            ),
+            mesh_.points()
+        )
     );
+
 }
 
 void Foam::markInterfaceRegion::markCellsNearSurf

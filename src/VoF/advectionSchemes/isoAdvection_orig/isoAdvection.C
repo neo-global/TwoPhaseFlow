@@ -8,7 +8,7 @@
     Copyright (C) 2016-2017 DHI
     Modified code Copyright (C) 2016-2017 OpenCFD Ltd.
     Modified code Copyright (C) 2019 Johan Roenby
-    Modified code Copyright (C) 2019 DLR
+    Modified code Copyright (C) 2019-2020 DLR
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "geoAdvection.H"
+#include "isoAdvection.H"
 #include "volFields.H"
+#include "interpolationCellPoint.H"
 #include "volPointInterpolation.H"
 #include "fvcSurfaceIntegrate.H"
 #include "fvcGrad.H"
@@ -37,6 +38,7 @@ License
 #include "cellSet.H"
 #include "meshTools.H"
 #include "OBJstream.H"
+#include "syncTools.H"
 
 #include "addToRunTimeSelectionTable.H"
 
@@ -46,14 +48,14 @@ namespace Foam
 {
 namespace advection
 {
-    defineTypeNameAndDebug(geoAdvection, 0);
-    addToRunTimeSelectionTable(advectionSchemes,geoAdvection, components);
+    defineTypeNameAndDebug(isoAdvection, 0);
+    addToRunTimeSelectionTable(advectionSchemes,isoAdvection, components);
 }
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::advection::geoAdvection::geoAdvection
+Foam::advection::isoAdvection::isoAdvection
 (
     volScalarField& alpha1,
     const surfaceScalarField& phi,
@@ -70,7 +72,21 @@ Foam::advection::geoAdvection::geoAdvection
     // General data
     mesh_(alpha1.mesh()),
     alpha1In_(alpha1.ref()),
+    dVf_
+    (
+        IOobject
+        (
+            "dVf_",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(dimVol, Zero)
+    ),
     advectionTime_(0),
+    timeIndex_(-1),
 
     // Tolerances and solution controls
     nAlphaBounds_(modelDict().lookupOrDefault<label>("nAlphaBounds", 3)),
@@ -81,7 +97,7 @@ Foam::advection::geoAdvection::geoAdvection
     // Cell cutting data
     surfCells_(label(0.2*mesh_.nCells())),
     advectFace_(alpha1.mesh(), alpha1),
-    bsFaces_(label(0.2*(mesh_.nFaces()-mesh_.nInternalFaces()))),
+    bsFaces_(label(0.2*mesh_.nBoundaryFaces())),
     bsx0_(bsFaces_.size()),
     bsn0_(bsFaces_.size()),
     bsUn0_(bsFaces_.size()),
@@ -107,23 +123,7 @@ Foam::advection::geoAdvection::geoAdvection
         mesh_.cellCells();
         mesh_.cells();
 
-        // // Get boundary mesh and resize the list for parallel comms
-        // const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-        // surfaceCellFacesOnProcPatches_.resize(patches.size());
-
-        // // Append all processor patch labels to the list
-        // forAll(patches, patchi)
-        // {
-        //     if
-        //     (
-        //         isA<processorPolyPatch>(patches[patchi])
-        //      && patches[patchi].size() > 0
-        //     )
-        //     {
-        //         procPatchLabels_.append(patchi);
-        //     }
-        // }
+        // Get boundary mesh and resize the list for parallel comms
         setProcessorPatches();
     }
 }
@@ -131,7 +131,7 @@ Foam::advection::geoAdvection::geoAdvection
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::advection::geoAdvection::setProcessorPatches()
+void Foam::advection::isoAdvection::setProcessorPatches()
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
     surfaceCellFacesOnProcPatches_.clear();
@@ -152,11 +152,206 @@ void Foam::advection::geoAdvection::setProcessorPatches()
     }
 }
 
+void Foam::advection::isoAdvection::extendMarkedCells
+(
+    bitSet& markedCell
+) const
+{
+    // Mark faces using any marked cell
+    bitSet markedFace(mesh_.nFaces());
+
+    for (const label celli : markedCell)
+    {
+        markedFace.set(mesh_.cells()[celli]);  // set multiple faces
+    }
+
+    syncTools::syncFaceList(mesh_, markedFace, orEqOp<unsigned int>());
+
+    // Update cells using any markedFace
+    for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
+    {
+        if (markedFace.test(facei))
+        {
+            markedCell.set(mesh_.faceOwner()[facei]);
+            markedCell.set(mesh_.faceNeighbour()[facei]);
+        }
+    }
+    for (label facei = mesh_.nInternalFaces(); facei < mesh_.nFaces(); ++facei)
+    {
+        if (markedFace.test(facei)) //markedFace.get() -RM
+        {
+            markedCell.set(mesh_.faceOwner()[facei]);
+        }
+    }
+}
+
+void Foam::advection::isoAdvection::timeIntegratedFlux()
+{
+    // Get time step
+    const scalar dt = mesh_.time().deltaTValue();
+
+    // Create object for interpolating velocity to isoface centres
+    interpolationCellPoint<vector> UInterp(U_);
+
+    // For each downwind face of each surface cell we "isoadvect" to find dVf
+    label nSurfaceCells = 0;
+
+    // Clear out the data for re-use and reset list containing information
+    // whether cells could possibly need bounding
+    clearIsoFaceData();
+
+    // Get necessary references
+    const scalarField& phiIn = phi_.primitiveField();
+    const scalarField& magSfIn = mesh_.magSf().primitiveField();
+    scalarField& dVfIn = dVf_.primitiveFieldRef();
+
+    // Get necessary mesh data
+    const cellList& cellFaces = mesh_.cells();
+    const labelList& own = mesh_.faceOwner();
 
 
+    // Storage for isoFace points. Only used if writeIsoFacesToFile_
+    DynamicList<List<point>> isoFacePts;
+    const DynamicField<label>& interfaceLabels = surf_->interfaceLabels();
+
+    // Loop through cells
+    forAll(interfaceLabels, i)
+    {
+        const label celli = interfaceLabels[i];
+        if (mag(surf_->normal()[celli]) != 0)
+        {
+
+            // This is a surface cell, increment counter, append and mark cell
+            nSurfaceCells++;
+            surfCells_.append(celli);
+
+            DebugInfo
+                << "\n------------ Cell " << celli << " with alpha1 = "
+                << alpha1In_[celli] << " and 1-alpha1 = "
+                << 1.0 - alpha1In_[celli] << " ------------"
+                << endl;
+
+            // Cell is cut
+            const point x0 = surf_->centre()[celli];
+            vector n0 = -surf_->normal()[celli];
+            n0 /= (mag(n0));
+
+            // Get the speed of the isoface by interpolating velocity and
+            // dotting it with isoface unit normal
+            const scalar Un0 = UInterp.interpolate(x0, celli) & n0;
+
+            DebugInfo
+                << "calcIsoFace gives initial surface: \nx0 = " << x0
+                << ", \nn0 = " << n0 << ", \nUn0 = "
+                << Un0 << endl;
+
+            // Estimate time integrated flux through each downwind face
+            // Note: looping over all cell faces - in reduced-D, some of
+            //       these faces will be on empty patches
+            const cell& celliFaces = cellFaces[celli];
+            forAll(celliFaces, fi)
+            {
+                const label facei = celliFaces[fi];
+
+                if (mesh_.isInternalFace(facei))
+                {
+                    bool isDownwindFace = false;
+
+                    if (celli == own[facei])
+                    {
+                        if (phiIn[facei] >= 0)
+                        {
+                            isDownwindFace = true;
+                        }
+                    }
+                    else
+                    {
+                        if (phiIn[facei] < 0)
+                        {
+                            isDownwindFace = true;
+                        }
+                    }
+
+                    if (isDownwindFace)
+                    {
+                        dVfIn[facei] = advectFace_.timeIntegratedFaceFlux
+                        (
+                            facei,
+                            x0,
+                            n0,
+                            Un0,
+                            dt,
+                            phiIn[facei],
+                            magSfIn[facei]
+                        );
+                    }
+
+                }
+                else
+                {
+                    bsFaces_.append(facei);
+                    bsx0_.append(x0);
+                    bsn0_.append(n0);
+                    bsUn0_.append(Un0);
+
+                    // Note: we must not check if the face is on the
+                    // processor patch here.
+                }
+            }
+        }
+    }
+
+    // Get references to boundary fields
+    const polyBoundaryMesh& boundaryMesh = mesh_.boundaryMesh();
+    const surfaceScalarField::Boundary& phib = phi_.boundaryField();
+    const surfaceScalarField::Boundary& magSfb = mesh_.magSf().boundaryField();
+    surfaceScalarField::Boundary& dVfb = dVf_.boundaryFieldRef();
+    const label nInternalFaces = mesh_.nInternalFaces();
+
+    // Loop through boundary surface faces
+    forAll(bsFaces_, i)
+    {
+        // Get boundary face index (in the global list)
+        const label facei = bsFaces_[i];
+        const label patchi = boundaryMesh.patchID()[facei - nInternalFaces];
+        const label start = boundaryMesh[patchi].start();
+
+        if (phib[patchi].size())
+        {
+            const label patchFacei = facei - start;
+            const scalar phiP = phib[patchi][patchFacei];
+
+            if (phiP >= 0)
+            {
+                const scalar magSf = magSfb[patchi][patchFacei];
+
+                dVfb[patchi][patchFacei] = advectFace_.timeIntegratedFaceFlux
+                (
+                    facei,
+                    bsx0_[i],
+                    bsn0_[i],
+                    bsUn0_[i],
+                    dt,
+                    phiP,
+                    magSf
+                );
+
+                // Check if the face is on processor patch and append it to
+                // the list if necessary
+                checkIfOnProcPatch(facei);
+            }
+        }
+    }
+
+    // Synchronize processor patches
+    syncProcPatches(dVf_, phi_);
+
+    DebugInfo << "Number of isoAdvector surface cells = "
+        << returnReduce(nSurfaceCells, sumOp<label>()) << endl;
+}
 
 
-void Foam::advection::geoAdvection::setDownwindFaces
+void Foam::advection::isoAdvection::setDownwindFaces
 (
     const label celli,
     DynamicLabelList& downwindFaces
@@ -195,7 +390,7 @@ void Foam::advection::geoAdvection::setDownwindFaces
 }
 
 
-Foam::scalar Foam::advection::geoAdvection::netFlux
+Foam::scalar Foam::advection::isoAdvection::netFlux
 (
     const surfaceScalarField& dVf,
     const label celli
@@ -228,7 +423,7 @@ Foam::scalar Foam::advection::geoAdvection::netFlux
 }
 
 
-Foam::DynamicList<Foam::label>  Foam::advection::geoAdvection::syncProcPatches
+Foam::DynamicList<Foam::label>  Foam::advection::isoAdvection::syncProcPatches
 (
     surfaceScalarField& dVf,
     const surfaceScalarField& phi,
@@ -281,10 +476,10 @@ Foam::DynamicList<Foam::label>  Foam::advection::geoAdvection::syncProcPatches
             List<scalar> nbrdVfs;
 
             fromNeighb >> faceIDs >> nbrdVfs;
-            if(returnSyncedFaces)
+            if (returnSyncedFaces)
             {
-                List <label> syncedFaceI(faceIDs);
-                for(label& faceI: syncedFaceI)
+                List<label> syncedFaceI(faceIDs);
+                for (label& faceI : syncedFaceI)
                 {
                     faceI += procPatch.start();
                 }
@@ -338,7 +533,7 @@ Foam::DynamicList<Foam::label>  Foam::advection::geoAdvection::syncProcPatches
 }
 
 
-void Foam::advection::geoAdvection::checkIfOnProcPatch(const label facei)
+void Foam::advection::isoAdvection::checkIfOnProcPatch(const label facei)
 {
     if (!mesh_.isInternalFace(facei))
     {
@@ -356,7 +551,7 @@ void Foam::advection::geoAdvection::checkIfOnProcPatch(const label facei)
 
 
 
-void Foam::advection::geoAdvection::applyBruteForceBounding()
+void Foam::advection::isoAdvection::applyBruteForceBounding()
 {
     bool alpha1Changed = false;
 

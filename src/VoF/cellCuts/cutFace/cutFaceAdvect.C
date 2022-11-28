@@ -156,7 +156,13 @@ Foam::label Foam::cutFaceAdvect::calcSubFace
     {
         faceStatus_ = -1;
         subFaceCentre_ = f.centre(points);
-        subFaceArea_ = f.areaNormal(points);
+        //subFaceArea_ = f.areaNormal(points);
+	    subFaceArea_ =
+		      0.5
+	         *(
+			           (points[1]-points[0])
+		              ^(points[2]-points[0])
+		      );
         return faceStatus_;
     }
     else if (inLiquid == 0) // gas face

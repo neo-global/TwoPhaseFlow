@@ -43,10 +43,10 @@ Foam::ClausiusClapeyron::ClausiusClapeyron
         mesh,
         dict
     ),
-    pSat0_(modelDict().get<scalar>("pSat0")),
-    TSat0_(modelDict().get<scalar>("TSat0")),
-    L0_(modelDict().get<scalar>("L0")),
-    R_(modelDict().get<scalar>("R")),
+    pSat0_(modelDict().lookup<scalar>("pSat0")),
+    TSat0_(modelDict().lookup<scalar>("TSat0")),
+    L0_(modelDict().lookup<scalar>("L0")),
+    R_(modelDict().lookup<scalar>("R")),
     C0_(C0())
 {
 }

@@ -32,11 +32,7 @@ Foam::accelerationForceModel::New
 
     word accelerationForceModelTypeName
     (
-        dict.getCompat<word>
-        (
-            "accelerationForceModel",
-            {{"accelerationModel", 1.1}}
-        )
+        dict.lookup("accelerationForceModel")
     );
 
     Info<< "Selecting surfaceTension model "

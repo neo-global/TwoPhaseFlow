@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
     #include "postProcess.H"
 
-    #include "addCheckCaseOptions.H"
+    //#include "addCheckCaseOptions.H"
     #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     #include "initCorrectPhi.H"
     #include "createUfIfPresent.H"
 
-    const bool overwrite = args.found("overwrite");
+    //const bool overwrite = args.found("overwrite");
 
     turbulence->validate();
 
@@ -63,13 +63,13 @@ int main(int argc, char *argv[])
         #include "setDeltaT.H"
 
         ++runTime;
-
+/*
         if(overwrite)
         {
             runTime.setTime(runTime.value() - runTime.deltaTValue(), 1);
             runTime.writeAndEnd();
         }
-
+*/
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         // --- Pressure-velocity PIMPLE corrector loop
@@ -117,11 +117,12 @@ int main(int argc, char *argv[])
                 }
             }
 
+/*
             if(overwrite)
             {
                 continue;
             }
-
+*/
             #include "alphaControls.H"
             #include "alphaEqnSubCycle.H"
 
@@ -150,7 +151,10 @@ int main(int argc, char *argv[])
 
         runTime.write();
 
-        runTime.printExecutionTime(Info);
+        //runTime.printExecutionTime(Info);
+        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+            << nl << endl;
     }
 
     Info<< "End\n" << endl;

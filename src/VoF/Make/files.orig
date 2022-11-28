@@ -19,15 +19,14 @@ implicitFunctions/ellipsoid/ellipsoidImplicitFunction.C
 implicitFunctions/paraboloid/paraboloidImplicitFunction.C
 implicitFunctions/plane/planeImplicitFunction.C
 implicitFunctions/cylinder/cylinderImplicitFunction.C
-/*
-implicitFunctions/composedFunction/composedFunctionImplicitFunction.C
+/*implicitFunctions/composedFunction/composedFunctionImplicitFunction.C
 */
-
+/*
 zoneDistribute/zoneStencils/zoneCellStencils.C
 zoneDistribute/zoneStencils/zoneCPCStencil.C
 zoneDistribute/zoneDistribute.C
 zoneDistribute/zoneDistributePoints.C
-
+*/
 
 multiDimPolyFitter/multiDimPolyFunctions/multiDimPolyFunctions.C
 multiDimPolyFitter/multiDimPolyFunctions/polyDegree1.C
@@ -54,8 +53,6 @@ advectionSchemes/newAdvectionSchemes.C
 advectionSchemes/advectionSchemes.C
 advectionSchemes/isoAdvection/isoAdvection.C
 advectionSchemes/geoAdvection/geoAdvection.C
-/*
-advectionSchemes/MULES/MULESScheme.C
+/*advectionSchemes/MULES/MULESScheme.C
 */
-
 LIB = $(FOAM_USER_LIBBIN)/libVoF

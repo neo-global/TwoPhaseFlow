@@ -75,14 +75,18 @@ Foam::zoneDistribute::coupledFacesPatch() const
         }
     }
 
-    return autoPtr<indirectPrimitivePatch>::New
+    //-RM
+    return autoPtr<indirectPrimitivePatch>
     (
-        IndirectList<face>
+        new indirectPrimitivePatch
         (
-            mesh_.faces(),
-            coupledFaces
-        ),
-        mesh_.points()
+            IndirectList<face>
+            (
+                mesh_.faces(),
+                coupledFaces
+            ),
+            mesh_.points()
+        )
     );
 }
 
@@ -108,16 +112,19 @@ Foam::zoneDistribute& Foam::zoneDistribute::New(const fvMesh& mesh)
     (
         zoneDistribute::typeName
     );
-    zoneDistribute* ptr = nullptr;
+    //zoneDistribute* ptr = nullptr;
 
     if(found)
     {
-        ptr = mesh.thisDb().getObjectPtr<zoneDistribute>
+        //-RM
+        //ptr = mesh.thisDb().getObjectPtr<zoneDistribute>
+        zoneDistribute& ptr =
+        mesh.thisDb().lookupObjectRef<zoneDistribute>
         (
             zoneDistribute::typeName
         );
 
-        return *ptr;
+        return ptr; //*ptr;
     }
 
     zoneDistribute* objectPtr = new zoneDistribute(mesh);
@@ -151,11 +158,13 @@ void Foam::zoneDistribute::setUpCommforZone(const boolList& zone,bool updateSten
 
     if (Pstream::parRun())
     {
-        for (const label celli : comms)
+        //-RM
+        //for (const label celli : comms)
+        forAllConstIter(labelHashSet, comms, celli)
         {
-            if (zone[celli])
+            if (zone[celli.key()])
             {
-                for (const label gblIdx : stencil_[celli])
+                for (const label gblIdx : stencil_[celli.key()])
                 {
                     if(!gblIdx_.isLocal(gblIdx))
                     {

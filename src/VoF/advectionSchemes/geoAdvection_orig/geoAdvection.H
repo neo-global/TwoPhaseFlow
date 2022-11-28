@@ -65,7 +65,7 @@ SourceFiles
 #include "className.H"
 #include "reconstructionSchemes.H"
 #include "cutFaceAdvect.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "zeroField.H"
 #include "localEulerDdtScheme.H"
 

@@ -62,7 +62,7 @@ Foam::label Foam::surfaceIteratorPLIC::vofCutCell
         return sign(alpha1-0.5);
     }
 
-    normal.normalise();
+    normal /= mag(normal);
 
     // Finding cell vertex extrema values
     const labelList& pLabels = mesh_.cellPoints(celli);
