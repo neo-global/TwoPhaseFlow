@@ -370,7 +370,6 @@ void Foam::advection::isoAdvection::boundFlux
     DebugInfo << "correctedFaces = " << correctedFaces << endl;
 }
 
-
 template<class SpType, class SuType>
 void Foam::advection::isoAdvection::advect(const SpType& Sp, const SuType& Su)
 {

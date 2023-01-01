@@ -140,6 +140,7 @@ Foam::label Foam::cutCellIso::calcSubCell
         cutFaceCentres_.append(faceCentre_);
         cutFaceAreas_.append(faceArea_);
 
+        //-RM: sub-cell
         // calc volume and sub cell centre
         calcCellData
         (

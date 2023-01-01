@@ -136,6 +136,13 @@ public:
         {
             // do nothing;
         }
+        virtual const DynamicList<point>& facePoints()
+        {
+            return sIterIso_.facePoints();
+        }
+
+        virtual void writeIsoFaces(DynamicList<List<point>>& faces);
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

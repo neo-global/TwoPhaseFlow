@@ -248,7 +248,7 @@ void Foam::cutFace::calcSubFace
             surfacePoints.append(p);
         }
     }
-
+    Info<<f<<"\t"<<subFacePoints<<"\t"<<surfacePoints<<endl;
     if (subFacePoints.size() >= 3)
     {
         faceStatus = 0;
@@ -279,6 +279,9 @@ void Foam::cutFace::calcSubFaceCentreAndArea
 
         subFaceArea = 0.5 * ((subFacePoints[1] - subFacePoints[0]) ^
                              (subFacePoints[2] - subFacePoints[0]));
+        //-RM
+        //scalar tanTheta = (subFacePoints[1] - subFacePoints[0])/(subFacePoints[2] - subFacePoints[0]);
+
     }
     else if (nPoints > 0)
     {

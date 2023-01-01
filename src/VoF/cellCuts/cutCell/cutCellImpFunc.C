@@ -376,7 +376,7 @@ Foam::label Foam::cutCellImpFunc::calcSubCell
             return cellStatus_;
         }
 
-        // pointField surfPoints(facePoints());
+        pointField surfPoints(facePoints());
         // face freeF (identity(surfPoints.size()));
         // DynamicList<face> fL;
 
@@ -390,11 +390,13 @@ Foam::label Foam::cutCellImpFunc::calcSubCell
 
         // freeSurf_ = triSurface(triF,surfPoints);
 
-        // forAll(freeSurf_,triI)
-        // {
-        //     cutFaceCentres_.append(freeSurf_.Sf()[triI]);
-        //     cutFaceAreas_.append(freeSurf_.Cf()[triI]);
-        // }
+         forAll(freeSurf_,triI)
+         {
+             //cutFaceCentres_.append(freeSurf_.Sf()[triI]);
+             //cutFaceAreas_.append(freeSurf_.Cf()[triI]);
+             //cutFaceCentres_.append();
+             //cutFaceAreas_.append(freeSurf_[triI]->centre());
+         }
 
         // calc volume and sub cell centre
         calcCellData

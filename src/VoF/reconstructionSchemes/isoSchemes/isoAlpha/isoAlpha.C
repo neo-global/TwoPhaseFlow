@@ -28,6 +28,7 @@ License
 #include "isoAlpha.H"
 #include "addToRunTimeSelectionTable.H"
 #include "cutCellPLIC.H"
+#include "OBJstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -103,6 +104,8 @@ void Foam::reconstruction::isoAlpha::reconstruct(bool forceUpdate)
 
     interfaceLabels_.clear();
 
+    scalar area = 0;
+
     forAll(alpha1_,cellI)
     {
         if (sIterIso_.isASurfaceCell(alpha1_[cellI]))
@@ -124,11 +127,15 @@ void Foam::reconstruction::isoAlpha::reconstruct(bool forceUpdate)
                 if (mag(normal_[cellI]) != 0)
                 {
                     interfaceCell_[cellI] = true;
+                    facePts.append(sIterIso_.facePoints());
+                    area += mag(normal_[cellI]);
                 }
                 else
                 {
                     interfaceCell_[cellI] = false;
+                  //facePts.append(sIterIso_.facePoints());
                 }
+
             }
             else
             {
@@ -144,7 +151,90 @@ void Foam::reconstruction::isoAlpha::reconstruct(bool forceUpdate)
             interfaceCell_[cellI] = false;
          }
     }
+    Info<<"Area :"<<area<<endl;
+    writeIsoFaces(facePts);
 }
 
+void Foam::reconstruction::isoAlpha::writeIsoFaces
+(
+    DynamicList<List<point>>& faces
+)
+{
+
+    //bool writeIsoFaces = modelDict().readIfPresent("writeIsoFaces", True);
+    //if(writeIsoFaces && mesh_.time().writeTime())
+    if(mesh_.time().writeTime())
+    {
+        // Writing isofaces to obj file for inspection, e.g. in paraview
+        const fileName dirName
+        (
+            Pstream::parRun() ?
+                mesh_.time().path()/".."/"isoFaces"
+              : mesh_.time().path()/"isoFaces"
+        );
+        const string fName
+        (
+            "isoFaces_" + alpha1_.name() + Foam::name(mesh_.time().timeIndex())
+            // Changed because only OF+ has two parameter version of Foam::name
+            // "isoFaces_" + Foam::name("%012d", mesh_.time().timeIndex())
+        );
+
+        if (Pstream::parRun())
+        {
+            // Collect points from all the processors
+            List<DynamicList<List<point> > > allProcFaces(Pstream::nProcs());
+            allProcFaces[Pstream::myProcNo()] = faces;
+            Pstream::gatherList(allProcFaces);
+
+            if (Pstream::master())
+            {
+                mkDir(dirName);
+                OBJstream os(dirName/fName + ".obj");
+                Info<< nl << "isoAdvection: writing iso faces to file: "
+                    << os.name() << nl << endl;
+
+                face f;
+                forAll(allProcFaces, proci)
+                {
+                    const DynamicList<List<point> >& procFacePts =
+                        allProcFaces[proci];
+
+                    forAll(procFacePts, i)
+                    {
+                        const List<point>& facePts = procFacePts[i];
+
+                        if (facePts.size() != f.size())
+                        {
+                            f = face(identity(facePts.size()));
+                        }
+
+                        os.write(f, facePts, false);
+                    }
+                }
+            }
+        }
+        else
+        {
+            mkDir(dirName);
+            OBJstream os(dirName/fName + ".obj");
+            Info<< nl << "isoAdvection: writing iso faces to file: "
+                << os.name() << nl << endl;
+
+            face f;
+            Info<<"During write from reconstruction, face list size: "<<faces.size()<<endl;
+            forAll(faces, i)
+            {
+                const List<point>& facePts = faces[i];
+
+                if (facePts.size() != f.size())
+                {
+                    f = face(identity(facePts.size()));
+                }
+
+                os.write(f, facePts, false);
+            }
+        }
+    }
+}
 
 // ************************************************************************* //

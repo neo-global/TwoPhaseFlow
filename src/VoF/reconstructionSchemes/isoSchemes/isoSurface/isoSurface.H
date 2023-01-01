@@ -113,6 +113,10 @@ public:
         {
             return cutCell_;
         }
+        const DynamicList<point>& facePoints()
+        {
+            return cutCell_.facePoints();
+        }
 
 };
 
