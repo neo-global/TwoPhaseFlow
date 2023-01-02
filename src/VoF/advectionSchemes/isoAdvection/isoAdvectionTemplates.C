@@ -239,7 +239,8 @@ void Foam::advection::isoAdvection::boundFlux
     const volScalarField& alphaOld = alpha1_.oldTime();
 
     // Loop through alpha cell centred field
-    for(label celli: nextToInterface)
+    //for(label celli: nextToInterface)
+    forAll(alpha1_, celli)
     {
         if (alpha1_[celli] < -aTol || alpha1_[celli] > 1 + aTol)
         {

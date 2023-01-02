@@ -106,7 +106,7 @@ Foam::advection::isoAdvection::isoAdvection
     procPatchLabels_(mesh_.boundary().size()),
     surfaceCellFacesOnProcPatches_(0)
 {
-   cutFaceAdvect::debug = debug;
+    cutFaceAdvect::debug = debug;
 
     // Prepare lists used in parallel runs
     if (Pstream::parRun())
