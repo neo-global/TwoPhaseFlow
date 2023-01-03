@@ -663,8 +663,6 @@ void Foam::advection::isoAdvection::writeIsoFaces
 
     surf_->writeIsoFaces(faces);
 
-
-
     if (!writeIsoFacesToFile_ || !mesh_.time().writeTime()) return;
 
     // Writing isofaces to obj file for inspection, e.g. in paraview

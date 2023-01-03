@@ -190,7 +190,7 @@ void Foam::reconstruction::isoAlpha::writeIsoFaces
             {
                 mkDir(dirName);
                 OBJstream os(dirName/fName + ".obj");
-                Info<< nl << "isoAdvection: writing iso faces to file: "
+                Info<< nl << "isoAlpha: writing iso faces to file: "
                     << os.name() << nl << endl;
 
                 face f;
@@ -217,11 +217,10 @@ void Foam::reconstruction::isoAlpha::writeIsoFaces
         {
             mkDir(dirName);
             OBJstream os(dirName/fName + ".obj");
-            Info<< nl << "isoAdvection: writing iso faces to file: "
+            Info<< nl << "isoAlpha: writing iso faces to file: "
                 << os.name() << nl << endl;
 
             face f;
-            Info<<"During write from reconstruction, face list size: "<<faces.size()<<endl;
             forAll(faces, i)
             {
                 const List<point>& facePts = faces[i];

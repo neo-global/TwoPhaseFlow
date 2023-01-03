@@ -248,7 +248,7 @@ void Foam::cutFace::calcSubFace
             surfacePoints.append(p);
         }
     }
-    Info<<f<<"\t"<<subFacePoints<<"\t"<<surfacePoints<<endl;
+
     if (subFacePoints.size() >= 3)
     {
         faceStatus = 0;
