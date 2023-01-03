@@ -152,8 +152,11 @@ void Foam::advection::geoAdvection::setProcessorPatches()
     }
 }
 
-
-
+//-RM
+void Foam::advection::geoAdvection::reconstruct()
+{
+    //surf_->reconstruct();
+}
 
 
 void Foam::advection::geoAdvection::setDownwindFaces

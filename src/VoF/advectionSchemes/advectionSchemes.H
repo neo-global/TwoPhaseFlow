@@ -154,6 +154,8 @@ public:
 
 
     // Member Functions
+        //- reconstruction of the interface
+    //    virtual void reconstruct() = 0;
 
         //- advection of the interface
         virtual void advect() = 0;
@@ -226,7 +228,11 @@ public:
             return runTime_;
         }
 
-
+        //- Return alpha field
+        const volScalarField& alpha() const
+        {
+            return alpha1_;
+        }
 };
 
 

@@ -295,6 +295,10 @@ public:
 
     // Member functions
 
+        //-RM: reconstruct interface
+        //void reconstruct();
+        void construct();
+
         //- Advect the free surface. Updates alpha field, taking into account
         //  multiple calls within a single time step.
         template < class SpType, class SuType >
@@ -318,6 +322,18 @@ public:
             advect<volScalarField::Internal,volScalarField::Internal>(Sp,Su);
         }
 
+
+        //- Return cellSet of surface cells
+        //void writeSurfaceCells() const;
+
+        //- Return cellSet of bounded cells
+        //void writeBoundedCells() const;
+
+        //- Write isoface points to .obj file
+        void writeIsoFaces
+        (
+            DynamicList<List<point> >& isoFacePts
+        );
 
 };
 

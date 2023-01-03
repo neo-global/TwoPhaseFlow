@@ -317,6 +317,10 @@ public:
 
     // Member functions
 
+        //-RM: reconstruct interface
+        //void reconstruct();
+        void reconstruct();
+
         //- Advect the free surface. Updates alpha field, taking into account
         //  multiple calls within a single time step.
         template < class SpType, class SuType >

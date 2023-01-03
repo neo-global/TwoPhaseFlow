@@ -68,12 +68,15 @@ Foam::label Foam::surfaceIteratorIso::vofCutCell
     // Special case where method is given an almost full or empty cell
     if (alpha1 < tol)
     {
+        Info<<"almost empty cell"<<endl;
         return -1; // is area and centre is zero;
     }
     else if (1 - alpha1 < tol)
     {
+        Info<<"almost full cell"<<endl;
         return 1;
     }
+    //-RM: shouldn't we include these in area calculations?
 
     // Finding the two vertices inbetween which the isovalue giving alpha1 lies
     label L1 = 0;

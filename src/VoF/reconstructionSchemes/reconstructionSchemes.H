@@ -215,6 +215,11 @@ public:
         virtual void mapAlphaField() const
         {}
 
+        virtual const DynamicList<point>& facePoints()
+        {}
+
+        virtual void writeIsoFaces(DynamicList<List<point>>& isoFacePts)
+        {}
 
 };
 

@@ -240,7 +240,7 @@ void Foam::advection::isoAdvection::boundFlux
 
     // Loop through alpha cell centred field
     //for(label celli: nextToInterface)
-    forAll(alpha1_, celli)
+    forAll(alpha1_,celli)
     {
         if (alpha1_[celli] < -aTol || alpha1_[celli] > 1 + aTol)
         {
@@ -370,7 +370,6 @@ void Foam::advection::isoAdvection::boundFlux
 
     DebugInfo << "correctedFaces = " << correctedFaces << endl;
 }
-
 
 template<class SpType, class SuType>
 void Foam::advection::isoAdvection::advect(const SpType& Sp, const SuType& Su)
