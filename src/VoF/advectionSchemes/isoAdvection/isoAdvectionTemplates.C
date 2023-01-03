@@ -371,6 +371,11 @@ void Foam::advection::isoAdvection::boundFlux
     DebugInfo << "correctedFaces = " << correctedFaces << endl;
 }
 
+void Foam::advection::isoAdvection::construct()
+{
+    surf_->reconstruct();
+}
+
 template<class SpType, class SuType>
 void Foam::advection::isoAdvection::advect(const SpType& Sp, const SuType& Su)
 {
@@ -386,7 +391,9 @@ void Foam::advection::isoAdvection::advect(const SpType& Sp, const SuType& Su)
     scalar rDeltaT = 1/mesh_.time().deltaTValue();
 
     // reconstruct the interface
+    Info<<"Calling reconstruct..";
     surf_->reconstruct();
+    Info<<"done."<<"\t";
 
     if(timeIndex_ < mesh_.time().timeIndex())
     {
@@ -395,12 +402,34 @@ void Foam::advection::isoAdvection::advect(const SpType& Sp, const SuType& Su)
         surf_->centre().oldTime() = surf_->centre();
     }
 
+    if(mesh_.time().writeTime())
+    {
+        //-RM: get initial position...
+        Info<<"writeTime() found. Saved old data of interface..."<<"\t";
+
+        //objectRegistry::template lookupObjectRef
+
+        volVectorField& oldCentre = mesh_.lookupObjectRef<volVectorField>("oldInterfaceCentre");
+        volVectorField& oldNormal = mesh_.lookupObjectRef<volVectorField>("oldInterfaceNormal");
+
+
+        oldCentre = surf_->centre().oldTime();
+        oldNormal = surf_->normal().oldTime();
+
+        oldCentre.write();
+        oldNormal.write();
+    }
+
     // Initialising dVf with upwind values
     // i.e. phi[facei]*alpha1[upwindCell[facei]]*dt
     dVf_ = upwind<scalar>(mesh_, phi_).flux(alpha1_)*mesh_.time().deltaT();
 
+    //-RM: is this where flux can instead be calculated from a different scheme?
+
+    Info<<"Calling timeIntergratedFlux..";
     // Do the isoAdvection on surface cells
     timeIntegratedFlux();
+    Info<<"done."<<"\t";
 
     // Adjust alpha for mesh motion
     if (mesh_.moving())
