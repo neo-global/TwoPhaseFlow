@@ -58,6 +58,7 @@ namespace advection
 Foam::advection::isoAdvection::isoAdvection
 (
     volScalarField& alpha1,
+    volScalarField& alpha2,
     const surfaceScalarField& phi,
     const volVectorField& U
 )
@@ -66,12 +67,14 @@ Foam::advection::isoAdvection::isoAdvection
     (
         typeName,
         alpha1,
+        alpha2,
         phi,
         U
     ),
     // General data
     mesh_(alpha1.mesh()),
     alpha1In_(alpha1.ref()),
+    alpha2In_(alpha2.ref()),
     dVf_
     (
         IOobject
@@ -186,6 +189,12 @@ void Foam::advection::isoAdvection::extendMarkedCells
     }
 }
 
+
+void Foam::advection::isoAdvection::construct()
+{
+    surf_->reconstruct();
+}
+
 void Foam::advection::isoAdvection::timeIntegratedFlux()
 {
     // Get time step
@@ -209,6 +218,7 @@ void Foam::advection::isoAdvection::timeIntegratedFlux()
     // Get necessary mesh data
     const cellList& cellFaces = mesh_.cells();
     const labelList& own = mesh_.faceOwner();
+    const labelList& nei = mesh_.faceNeighbour();
 
 
     // Storage for isoFace points. Only used if writeIsoFacesToFile_
@@ -268,6 +278,12 @@ void Foam::advection::isoAdvection::timeIntegratedFlux()
                         if (phiIn[facei] >= 0)
                         {
                             isDownwindFace = true;
+                            //-RM
+                            if (mag(surf_->normal()[nei[facei]]) != 0)
+                            {
+//                                Info<<"Downwind cell is also cut. critical cell pair (possibly?) encountered: "<<celli<<"\t"<<nei[facei]<<endl;
+                                markCell(celli,nei[facei],"criticalVOF_2");
+                            }
                         }
                     }
                     else
@@ -275,6 +291,12 @@ void Foam::advection::isoAdvection::timeIntegratedFlux()
                         if (phiIn[facei] < 0)
                         {
                             isDownwindFace = true;
+                            //-RM
+                            if (mag(surf_->normal()[own[facei]]) != 0)
+                            {
+//                                Info<<"Downwind cell is also cut. critical cell pair (possibly?) encountered: "<<celli<<"\t"<<own[facei]<<endl;
+                                markCell(celli,own[facei],"criticalVOF_2");
+                            }
                         }
                     }
 
@@ -358,6 +380,14 @@ void Foam::advection::isoAdvection::timeIntegratedFlux()
         << returnReduce(nSurfaceCells, sumOp<label>()) << endl;
 }
 
+void Foam::advection::isoAdvection::markCell
+(label celli, label neiCelli, word fieldName)
+{
+    volScalarField& markerField = mesh_.lookupObjectRef<volScalarField>(fieldName);
+
+    markerField[celli]++;
+    markerField[neiCelli]++;
+}
 
 void Foam::advection::isoAdvection::setDownwindFaces
 (

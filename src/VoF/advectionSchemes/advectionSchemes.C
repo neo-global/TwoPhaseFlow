@@ -37,6 +37,7 @@ Foam::advectionSchemes::advectionSchemes
 (
         const word& type,
         volScalarField& alpha1,
+        volScalarField& alpha2,
         const surfaceScalarField& phi,
         const volVectorField& U
 )
@@ -55,6 +56,7 @@ Foam::advectionSchemes::advectionSchemes
   advectionSchemesCoeffs_(alpha1.mesh().solverDict(alpha1.name())),
 
   alpha1_(alpha1),
+  alpha2_(alpha2),
   phi_(phi),
   U_(U),
   alphaPhi_
@@ -70,7 +72,7 @@ Foam::advectionSchemes::advectionSchemes
       alpha1_.mesh(),
       dimensionedScalar("zero", dimVol/dimTime, 0)
   ),
-  surf_(reconstructionSchemes::New(alpha1_,phi_,U_,modelDict())),
+  surf_(reconstructionSchemes::New(alpha1_,alpha2_,phi_,U_,modelDict())),
   runTime_(0,0,0)
 {
 

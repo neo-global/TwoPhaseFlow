@@ -40,6 +40,7 @@ namespace reconstruction
 Foam::reconstruction::isoSurface::isoSurface
 (
     volScalarField& alpha1,
+    volScalarField& alpha2,
     const surfaceScalarField& phi,
     const volVectorField& U,
     const dictionary& dict
@@ -49,6 +50,7 @@ Foam::reconstruction::isoSurface::isoSurface
     (
         typeName,
         alpha1,
+        alpha2,
         phi,
         U,
         dict

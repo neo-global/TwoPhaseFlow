@@ -34,6 +34,7 @@ Foam::autoPtr<Foam::reconstructionSchemes>
 Foam::reconstructionSchemes::New
 (
     volScalarField& alpha1,
+    volScalarField& alpha2,
     const surfaceScalarField& phi,
     const volVectorField& U,
     const dictionary& dict
@@ -66,7 +67,7 @@ Foam::reconstructionSchemes::New
             << exit(FatalError);
     }
 
-    return autoPtr<reconstructionSchemes>(cstrIter()(alpha1, phi, U, dict));
+    return autoPtr<reconstructionSchemes>(cstrIter()(alpha1, alpha2, phi, U, dict));
 }
 
 

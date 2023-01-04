@@ -116,6 +116,7 @@ public:
     isoAlpha
     (
         volScalarField& alpha1,
+        volScalarField& alpha2,
         const surfaceScalarField& phi,
         const volVectorField& U,
         const dictionary& dict
@@ -136,13 +137,7 @@ public:
         {
             // do nothing;
         }
-        virtual const DynamicList<point>& facePoints()
-        {
-            return sIterIso_.facePoints();
-        }
-
-        virtual void writeIsoFaces(DynamicList<List<point>>& faces);
-
+        void writeIsoFaces(DynamicList<List<point>>& faces);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

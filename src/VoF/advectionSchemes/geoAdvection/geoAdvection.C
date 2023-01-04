@@ -56,6 +56,7 @@ namespace advection
 Foam::advection::geoAdvection::geoAdvection
 (
     volScalarField& alpha1,
+    volScalarField& alpha2,
     const surfaceScalarField& phi,
     const volVectorField& U
 )
@@ -64,12 +65,14 @@ Foam::advection::geoAdvection::geoAdvection
     (
         typeName,
         alpha1,
+        alpha2,
         phi,
         U
     ),
     // General data
     mesh_(alpha1.mesh()),
     alpha1In_(alpha1.ref()),
+    alpha2In_(alpha2.ref()),
     advectionTime_(0),
 
     // Tolerances and solution controls

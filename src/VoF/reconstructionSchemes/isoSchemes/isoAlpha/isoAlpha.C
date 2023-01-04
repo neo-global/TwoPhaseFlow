@@ -47,6 +47,7 @@ namespace reconstruction
 Foam::reconstruction::isoAlpha::isoAlpha
 (
     volScalarField& alpha1,
+    volScalarField& alpha2,
     const surfaceScalarField& phi,
     const volVectorField& U,
     const dictionary& dict
@@ -56,6 +57,7 @@ Foam::reconstruction::isoAlpha::isoAlpha
     (
         typeName,
         alpha1,
+        alpha2,
         phi,
         U,
         dict
@@ -108,7 +110,8 @@ void Foam::reconstruction::isoAlpha::reconstruct(bool forceUpdate)
 
     forAll(alpha1_,cellI)
     {
-        if (sIterIso_.isASurfaceCell(alpha1_[cellI]))
+        //if (sIterIso_.isASurfaceCell(alpha1_[cellI]))
+        if (sIterIso_.isASurfaceCell(alpha1_[cellI], alpha2_[cellI]))
         {
             interfaceLabels_.append(cellI);
 
@@ -174,7 +177,7 @@ void Foam::reconstruction::isoAlpha::writeIsoFaces
         );
         const string fName
         (
-            "isoFaces_" + alpha1_.name() + Foam::name(mesh_.time().timeIndex())
+            "isoFaces_" + alpha1_.name() + alpha2_.name() + Foam::name(mesh_.time().timeIndex())
             // Changed because only OF+ has two parameter version of Foam::name
             // "isoFaces_" + Foam::name("%012d", mesh_.time().timeIndex())
         );

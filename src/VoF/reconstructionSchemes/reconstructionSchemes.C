@@ -82,6 +82,7 @@ Foam::reconstructionSchemes::reconstructionSchemes
 (
     const word& type,
     volScalarField& alpha1,
+    volScalarField& alpha2,
     const surfaceScalarField& phi,
     const volVectorField& U,
     const dictionary& dict
@@ -100,13 +101,14 @@ Foam::reconstructionSchemes::reconstructionSchemes
     ),
     reconstructionSchemesCoeffs_(dict),
     alpha1_(alpha1),
+    alpha2_(alpha2),
     phi_(phi),
     U_(U),
     normal_
     (
         IOobject
         (
-            IOobject::groupName("interfaceNormal", alpha1.group()),
+            IOobject::groupName("interfaceNormal", alpha1.group() + "_" + alpha2.group()),
             alpha1_.mesh().time().timeName(),
             alpha1_.mesh(),
             IOobject::NO_READ,
@@ -119,7 +121,7 @@ Foam::reconstructionSchemes::reconstructionSchemes
     (
         IOobject
         (
-            IOobject::groupName("interfaceCentre", alpha1.group()),
+            IOobject::groupName("interfaceCentre", alpha1.group() + "_" + alpha2.group()),
             alpha1_.mesh().time().timeName(),
             alpha1_.mesh(),
             IOobject::NO_READ,

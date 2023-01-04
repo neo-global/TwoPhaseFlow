@@ -107,6 +107,15 @@ public:
             );
         }
 
+        bool isASurfaceCell(const scalar alpha1, const scalar alpha2) const
+        {
+            return
+            (
+                isASurfaceCell(alpha1)
+            &&  isASurfaceCell(alpha2)
+            );
+        }
+
         //- finds matching isoValue for the given value fraction
         //- returns the cellStatus
         label vofCutCell

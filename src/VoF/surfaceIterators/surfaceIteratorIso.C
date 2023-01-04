@@ -66,6 +66,9 @@ Foam::label Foam::surfaceIteratorIso::vofCutCell
     scalar f2 = fvert[order.last()];
 
     // Special case where method is given an almost full or empty cell
+    //These dont seem to happen, so we are getting a lot of isASurfaceCells.
+    //Likely that the isASurfaceCell criteria is for a liberal superset.
+    
     if (alpha1 < tol)
     {
         Info<<"almost empty cell"<<endl;

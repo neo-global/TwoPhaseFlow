@@ -413,6 +413,7 @@ void Foam::reconstruction::plicRDF::centreAndNormalBC()
 Foam::reconstruction::plicRDF::plicRDF
 (
     volScalarField& alpha1,
+    volScalarField& alpha2,
     const surfaceScalarField& phi,
     const volVectorField& U,
     const dictionary& dict
@@ -422,6 +423,7 @@ Foam::reconstruction::plicRDF::plicRDF
     (
         typeName,
         alpha1,
+        alpha2,
         phi,
         U,
         dict

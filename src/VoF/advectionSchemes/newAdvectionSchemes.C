@@ -29,6 +29,7 @@ Foam::autoPtr<Foam::advectionSchemes>
 Foam::advectionSchemes::New
 (
         volScalarField& alpha1,
+        volScalarField& alpha2,
         const surfaceScalarField& phi,
         const volVectorField& U
 )
@@ -72,7 +73,7 @@ Foam::advectionSchemes::New
             << exit(FatalError);
     }
 
-    return autoPtr<advectionSchemes>(cstrIter()( alpha1, phi,U));
+    return autoPtr<advectionSchemes>(cstrIter()( alpha1, alpha2, phi,U));
 }
 
 

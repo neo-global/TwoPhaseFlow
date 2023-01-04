@@ -96,6 +96,7 @@ void Foam::reconstruction::gradAlpha::gradSurf(const volScalarField& phi)
 Foam::reconstruction::gradAlpha::gradAlpha
 (
     volScalarField& alpha1,
+    volScalarField& alpha2,
     const surfaceScalarField& phi,
     const volVectorField& U,
     const dictionary& dict
@@ -105,6 +106,7 @@ Foam::reconstruction::gradAlpha::gradAlpha
     (
         typeName,
         alpha1,
+        alpha2,
         phi,
         U,
         dict

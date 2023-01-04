@@ -70,6 +70,9 @@ protected:
         //- Reference to the VoF Field
         volScalarField& alpha1_;
 
+        //- Reference to the other VoF Field
+        volScalarField& alpha2_;
+
         //- Reference to the face fluxes
         const surfaceScalarField& phi_;
 
@@ -121,11 +124,12 @@ public:
             components,
             (
                 volScalarField& alpha1,
+                volScalarField& alpha2,
                 const surfaceScalarField& phi,
                 const volVectorField& U,
                 const dictionary& dict
             ),
-            (alpha1, phi, U, dict)
+            (alpha1, alpha2, phi, U, dict)
         );
 
 
@@ -135,6 +139,7 @@ public:
         static autoPtr<reconstructionSchemes> New
         (
             volScalarField& alpha1,
+            volScalarField& alpha2,
             const surfaceScalarField& phi,
             const volVectorField& U,
             const dictionary& dict
@@ -148,6 +153,7 @@ public:
         (
             const word& type,
             volScalarField& alpha1,
+            volScalarField& alpha2,
             const surfaceScalarField& phi,
             const volVectorField& U,
             const dictionary& dict

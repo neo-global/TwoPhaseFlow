@@ -100,6 +100,9 @@ class isoAdvection
         //- Often used reference to alpha1 internal field
         scalarField& alpha1In_;
 
+        //- Often used reference to alpha2 internal field
+        scalarField& alpha2In_;
+
         //- Face volumetric water transport
         surfaceScalarField dVf_;
 
@@ -176,7 +179,12 @@ class isoAdvection
 
             //- For each face calculate volumetric face transport during dt
             void timeIntegratedFlux();
-
+            void markCell
+            (
+                label celli,
+                label neiCelli,
+                word fieldName
+            );
             //- For a given cell return labels of faces fluxing out of this cell
             //  (based on sign of phi)
             void setDownwindFaces
@@ -220,6 +228,8 @@ class isoAdvection
                 (
                     surfCellTol_ < alpha1In_[celli]
                  && alpha1In_[celli] < 1 - surfCellTol_
+                 && surfCellTol_ < alpha2In_[celli]
+                 && alpha2In_[celli] < 1 - surfCellTol_
                 );
             }
 
@@ -284,6 +294,7 @@ public:
         isoAdvection
         (
             volScalarField& alpha1,
+            volScalarField& alpha2,
             const surfaceScalarField& phi,
             const volVectorField& U
         );

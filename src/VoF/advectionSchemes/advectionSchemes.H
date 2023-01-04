@@ -69,6 +69,9 @@ protected:
         // reference to the VoF Field
         volScalarField& alpha1_;
 
+        // reference to the second VoF Field
+        volScalarField& alpha2_;
+
         // reference to the face fluxes
         const surfaceScalarField& phi_;
 
@@ -119,10 +122,11 @@ public:
             components,
             (
                 volScalarField& alpha1,
+                volScalarField& alpha2,
                 const surfaceScalarField& phi,
                 const volVectorField& U
             ),
-            (alpha1, phi,U)
+            (alpha1, alpha2, phi,U)
         );
 
 
@@ -132,6 +136,7 @@ public:
         static autoPtr<advectionSchemes> New
         (
                 volScalarField& alpha1,
+                volScalarField& alpha2,
                 const surfaceScalarField& phi,
                 const volVectorField& U
         );
@@ -144,6 +149,7 @@ public:
         (
             const word& type,
             volScalarField& alpha1,
+            volScalarField& alpha2,
             const surfaceScalarField& phi,
             const volVectorField& U
         );
@@ -232,6 +238,12 @@ public:
         const volScalarField& alpha() const
         {
             return alpha1_;
+        }
+
+        //- Return alpha field
+        const volScalarField& alpha2() const
+        {
+            return alpha2_;
         }
 };
 

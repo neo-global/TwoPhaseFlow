@@ -95,6 +95,7 @@ public:
         isoSurface
         (
             volScalarField& alpha1,
+            volScalarField& alpha2,
             const surfaceScalarField& phi,
             const volVectorField& U,
             const dictionary& dict

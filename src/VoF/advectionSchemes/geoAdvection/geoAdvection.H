@@ -100,6 +100,9 @@ class geoAdvection
         //- Often used reference to alpha1 internal field
         scalarField& alpha1In_;
 
+        //- Often used reference to alpha2 internal field
+        scalarField& alpha2In_;
+
         //- Time spent performing interface advection
         scalar advectionTime_;
 
@@ -306,6 +309,7 @@ public:
         geoAdvection
         (
             volScalarField& alpha1,
+            volScalarField& alpha2,
             const surfaceScalarField& phi,
             const volVectorField& U
         );

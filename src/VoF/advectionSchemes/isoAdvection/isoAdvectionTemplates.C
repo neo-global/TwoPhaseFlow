@@ -166,6 +166,9 @@ void Foam::advection::isoAdvection::limitFluxes
 
                     alpha1_[own] +=
                         -faceValue(dVfcorrectionValues, facei)/mesh_.V()[own];
+                    alpha2_[own] +=
+                            -faceValue(dVfcorrectionValues, facei)/mesh_.V()[own];
+
                     if (mesh_.isInternalFace(facei))
                     {
                         const label nei = neighbour[facei];
@@ -209,6 +212,7 @@ void Foam::advection::isoAdvection::limitFluxes
     }
 
     alpha1_.correctBoundaryConditions();
+    alpha2_.correctBoundaryConditions();
 
 }
 
@@ -371,11 +375,6 @@ void Foam::advection::isoAdvection::boundFlux
     DebugInfo << "correctedFaces = " << correctedFaces << endl;
 }
 
-void Foam::advection::isoAdvection::construct()
-{
-    surf_->reconstruct();
-}
-
 template<class SpType, class SuType>
 void Foam::advection::isoAdvection::advect(const SpType& Sp, const SuType& Su)
 {
@@ -393,7 +392,7 @@ void Foam::advection::isoAdvection::advect(const SpType& Sp, const SuType& Su)
     // reconstruct the interface
     Info<<"Calling reconstruct..";
     surf_->reconstruct();
-    Info<<"done."<<"\t";
+    Info<<"done."<<endl;
 
     if(timeIndex_ < mesh_.time().timeIndex())
     {
@@ -405,10 +404,10 @@ void Foam::advection::isoAdvection::advect(const SpType& Sp, const SuType& Su)
     if(mesh_.time().writeTime())
     {
         //-RM: get initial position...
-        Info<<"writeTime() found. Saved old data of interface..."<<"\t";
+        Info<<"writeTime() found. Saved old data of interface..."<<endl;
 
         //objectRegistry::template lookupObjectRef
-
+/*
         volVectorField& oldCentre = mesh_.lookupObjectRef<volVectorField>("oldInterfaceCentre");
         volVectorField& oldNormal = mesh_.lookupObjectRef<volVectorField>("oldInterfaceNormal");
 
@@ -418,18 +417,24 @@ void Foam::advection::isoAdvection::advect(const SpType& Sp, const SuType& Su)
 
         oldCentre.write();
         oldNormal.write();
+*/
+        surf_->normal().oldTime().write();
+        surf_->centre().oldTime().write();
     }
 
     // Initialising dVf with upwind values
     // i.e. phi[facei]*alpha1[upwindCell[facei]]*dt
     dVf_ = upwind<scalar>(mesh_, phi_).flux(alpha1_)*mesh_.time().deltaT();
 
+    word fluxScheme("div(phi,alpha)");
+    //dVf_ = fvc::flux(phi_,alpha1_,fluxScheme)*mesh_.time().deltaT();
+
     //-RM: is this where flux can instead be calculated from a different scheme?
 
-    Info<<"Calling timeIntergratedFlux..";
+    Info<<"Calling timeIntegratedFlux..";
     // Do the isoAdvection on surface cells
     timeIntegratedFlux();
-    Info<<"done."<<"\t";
+    Info<<"done."<<endl;
 
     // Adjust alpha for mesh motion
     if (mesh_.moving())
@@ -446,6 +451,17 @@ void Foam::advection::isoAdvection::advect(const SpType& Sp, const SuType& Su)
     )/(rDeltaT - Sp.field());
 
     alpha1_.correctBoundaryConditions();
+
+    // Adjust the other phase of the pair.
+    alpha2_.primitiveFieldRef() =
+    (
+        alpha2_.oldTime().primitiveField()*rDeltaT
+      - Su.field()
+      + fvc::surfaceIntegrate(dVf_)().primitiveField()*rDeltaT
+    )/(rDeltaT - Sp.field());
+
+    alpha2_.correctBoundaryConditions();
+
 
     // Adjust dVf for unbounded cells
     limitFluxes
